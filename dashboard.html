@@ -4,118 +4,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HS4 Correction Progress</title>
+    <title>HS4 Progress Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            background-color: #f1f5f9; 
-            color: #1e293b;
-            padding: 40px 20px;
-            line-height: 1.5;
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-        }
-        h1 { 
-            text-align: center; 
-            font-size: 28px;
-            margin-bottom: 40px; 
-            color: #0f172a;
-        }
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
-            gap: 24px; 
-        }
-        .card { 
-            background: #ffffff; 
-            border-radius: 16px; 
-            padding: 24px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            display: flex; 
-            flex-direction: column;
-            height: 450px; /* Fixed height to prevent layout shifting */
-        }
-        .card-title { 
-            font-weight: 700; 
-            font-size: 18px; 
-            color: #334155; 
-            text-align: center; 
-            margin-bottom: 20px;
-            height: 54px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 10px;
-        }
-        .pie-container { 
-            flex-grow: 1;
-            width: 100%;
-        }
-        .no-data { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #94a3b8; 
-            font-style: italic; 
-        }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; color: #0f172a; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 750px) { .grid { grid-template-columns: 1fr; } }
+        .card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); height: 380px; border: 1px solid #e2e8f0; transition: transform 0.2s; position: relative; }
+        .card:hover { transform: translateY(-3px); border-color: #2563eb; cursor: pointer; }
+        .card-title { font-weight: 700; font-size: 15px; text-align: center; margin-bottom: 10px; height: 45px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; }
+        .pie-container { flex-grow: 1; width: 100%; height: 280px; }
+        .no-data { display: flex; align-items: center; justify-content: center; height: 280px; color: #94a3b8; font-style: italic; text-align: center; width: 100%; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #64748b; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>สัดส่วนการแก้ไขมาตรฐาน HS4 (ด้านที่ 2, 5, 6, 7, 8)</h1>
+        <h1>ความก้าวหน้ามาตรฐาน HS4 (คลิกที่การ์ดเพื่อเปิดชีต)</h1>
         <div class="grid" id="charts-grid"></div>
+        <div class="footer">
+            <p>อัปเดตล่าสุด: 08/06/2026 11:17:19</p>
+            <p>แหล่งข้อมูล: Google Sheets (Cloud)</p>
+        </div>
     </div>
-
     <script>
-        const data = {"aspects": [{"aspect": "2. ด้านการบริการสุขภาพ", "status_counts": {"ยังไม่ได้แก้ไข": 8, "แก้ไขแล้ว": 6, "ไม่แก้ไข ยืนยันเดิม": 0}}, {"aspect": "ด้านที่ 5 ความปลอดภัย", "status_counts": {"ยังไม่ได้แก้ไข": 1, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}}, {"aspect": "ด้านที่ 6 เครื่องมืออุปกรณ์ทางก", "status_counts": {"ยังไม่ได้แก้ไข": 18, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}}, {"aspect": "ด้านที่ 7 ระบบสนับสนุนบริการที่", "status_counts": {"ยังไม่ได้แก้ไข": 3, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}}, {"aspect": "ด้านที่ 8 สุขศึกษาและพฤติกรรมสุ", "status_counts": {"ยังไม่ได้แก้ไข": 16, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}}]};
+        const rawData = {"aspects": [{"aspect": "ด้านที่ 1 การบริหารจัดการ", "gid": "224848204", "status_counts": {"ไม่ต้องแก้ไข": 12, "ยังไม่ได้แก้ไข": 0, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 2 การบริการสุขภาพ", "gid": "436568485", "status_counts": {"ไม่ต้องแก้ไข": 12, "ยังไม่ได้แก้ไข": 13, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 3 อาคาร สถานที่และสิ่งอำนวยความสะดวก", "gid": "1095125870", "status_counts": {"ไม่ต้องแก้ไข": 0, "ยังไม่ได้แก้ไข": 63, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 4 สิ่งแวดล้อม", "gid": "463522191", "status_counts": {"ไม่ต้องแก้ไข": 0, "ยังไม่ได้แก้ไข": 47, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 5 ความปลอดภัย", "gid": "802347761", "status_counts": {"ไม่ต้องแก้ไข": 41, "ยังไม่ได้แก้ไข": 1, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 6 เครื่องมืออุปกรณ์ทางการแพทย์", "gid": "2043104987", "status_counts": {"ไม่ต้องแก้ไข": 5, "ยังไม่ได้แก้ไข": 18, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 7 ระบบสนับสนุนบริการที่สำคัญ", "gid": "1017580441", "status_counts": {"ไม่ต้องแก้ไข": 23, "ยังไม่ได้แก้ไข": 3, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 8 สุขศึกษาและพฤติกรรมสุขภาพ", "gid": "1902948812", "status_counts": {"ไม่ต้องแก้ไข": 6, "ยังไม่ได้แก้ไข": 16, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}, {"aspect": "ด้านที่ 9 การรักษาความมั่นคงปลอดภัยไซเบอร์", "gid": "1389107320", "status_counts": {"ไม่ต้องแก้ไข": 0, "ยังไม่ได้แก้ไข": 28, "แก้ไขแล้ว": 0, "ไม่แก้ไข ยืนยันเดิม": 0}, "is_pending": false, "has_data": true}], "sheet_id": "1gIQbPiSMGGuNwguv55TZ0pmU9rTV8W7-Js3BcFhjVtY"};
+        const sheetId = rawData.sheet_id;
         const grid = document.getElementById('charts-grid');
 
-        data.aspects.forEach((item, idx) => {
+        function openGoogleSheet(gid) {
+            window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${gid}`, '_blank');
+        }
+
+        rawData.aspects.forEach((item, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
+            card.onclick = () => openGoogleSheet(item.gid);
+            
+            const title = document.createElement('div');
+            title.className = 'card-title';
+            title.innerText = item.aspect;
+            card.appendChild(title);
             
             const total = Object.values(item.status_counts).reduce((a, b) => a + b, 0);
             
-            let contentHtml = `<div class="card-title">${item.aspect}</div>`;
-            if (total > 0) {
-                contentHtml += `<div id="pie-${idx}" class="pie-container"></div>`;
+            if (item.is_pending) {
+                const noData = document.createElement('div');
+                noData.className = 'no-data';
+                noData.innerText = '⚠️ รอการประเมินจากกรรมการ';
+                card.appendChild(noData);
+            } else if (item.has_data) {
+                const chartDiv = document.createElement('div');
+                chartDiv.id = `pie-${idx}`;
+                chartDiv.className = 'pie-container';
+                card.appendChild(chartDiv);
             } else {
-                contentHtml += `<div class="no-data">ไม่มีข้อมูลที่ต้องแก้ไข</div>`;
+                const noData = document.createElement('div');
+                noData.className = 'no-data';
+                noData.innerText = 'ไม่มีข้อมูลการประเมิน';
+                card.appendChild(noData);
             }
             
-            card.innerHTML = contentHtml;
             grid.appendChild(card);
 
-            if (total > 0) {
-                const pChart = echarts.init(document.getElementById(`pie-${idx}`));
-                pChart.setOption({
+            if (!item.is_pending && item.has_data) {
+                const chart = echarts.init(document.getElementById(`pie-${idx}`));
+                chart.setOption({
                     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-                    legend: { 
-                        bottom: '0', 
-                        left: 'center', 
-                        textStyle: { fontSize: 12 },
-                        itemWidth: 10,
-                        itemHeight: 10
-                    },
+                    legend: { bottom: '0', left: 'center', textStyle: { fontSize: 10 }, itemWidth: 8, itemHeight: 8 },
                     series: [{
-                        type: 'pie',
-                        radius: ['45%', '70%'],
-                        center: ['50%', '45%'],
-                        avoidLabelOverlap: true,
-                        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-                        label: { show: true, position: 'outside', formatter: '{d}%', fontSize: 12 },
-                        emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
+                        type: 'pie', radius: ['40%', '65%'], center: ['50%', '45%'],
+                        itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+                        label: { show: true, position: 'outside', formatter: '{d}%', fontSize: 11 },
                         data: [
+                            { value: item.status_counts['ไม่ต้องแก้ไข'], name: 'ผ่านเกณฑ์', itemStyle: {color: '#10b981'} },
                             { value: item.status_counts['ยังไม่ได้แก้ไข'], name: 'ยังไม่ได้แก้ไข', itemStyle: {color: '#ef4444'} },
-                            { value: item.status_counts['แก้ไขแล้ว'], name: 'แก้ไขแล้ว', itemStyle: {color: '#22c55e'} },
-                            { value: item.status_counts['ไม่แก้ไข ยืนยันเดิม'], name: 'ไม่แก้ไข ยืนยันเดิม', itemStyle: {color: '#3b82f6'} }
+                            { value: item.status_counts['แก้ไขแล้ว'], name: 'แก้ไขแล้ว', itemStyle: {color: '#3b82f6'} },
+                            { value: item.status_counts['ไม่แก้ไข ยืนยันเดิม'], name: 'ไม่แก้ไข ยืนยันเดิม', itemStyle: {color: '#f59e0b'} }
                         ]
                     }]
                 });
@@ -123,8 +93,8 @@
         });
 
         window.addEventListener('resize', () => {
-            data.aspects.forEach((_, idx) => {
-                const chart = echarts.getInstanceByDom(document.getElementById(`pie-${idx}`));
+            rawData.aspects.forEach((_, i) => {
+                const chart = echarts.getInstanceByDom(document.getElementById(`pie-${i}`));
                 if (chart) chart.resize();
             });
         });

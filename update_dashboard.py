@@ -1,6 +1,7 @@
 import openpyxl
 import json
 import os
+from datetime import datetime
 
 def extract_data(file_path):
     if not os.path.exists(file_path):
@@ -122,12 +123,22 @@ def generate_html(data):
             color: #94a3b8; 
             font-style: italic; 
         }
+        .footer { 
+            text-align: center; 
+            margin-top: 30px; 
+            font-size: 12px; 
+            color: #64748b; 
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>สัดส่วนการแก้ไขมาตรฐาน HS4 (ด้านที่ 2, 5, 6, 7, 8)</h1>
         <div class="grid" id="charts-grid"></div>
+        <div class="footer">
+            <p>อัปเดตล่าสุด: UPDATE_TIME_PLACEHOLDER</p>
+            <p>แหล่งข้อมูล: ไฟล์ Excel ในเครื่อง (การประเมิน HS4.xlsx)</p>
+        </div>
     </div>
 
     <script>
@@ -189,12 +200,14 @@ def generate_html(data):
 </body>
 </html>
 """
+    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     json_data = json.dumps(data, ensure_ascii=False)
     final_html = html_template.replace('DATA_PLACEHOLDER', json_data)
+    final_html = final_html.replace('UPDATE_TIME_PLACEHOLDER', now)
     
     with open('dashboard.html', 'w', encoding='utf-8') as f:
         f.write(final_html)
-    print("Dashboard updated and layout fixed: dashboard.html")
+    print(f"Dashboard updated and layout fixed: dashboard.html (at {now})")
 
 if __name__ == "__main__":
     extracted_data = extract_data('การประเมิน HS4.xlsx')
